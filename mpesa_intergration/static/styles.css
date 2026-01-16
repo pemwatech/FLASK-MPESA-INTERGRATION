@@ -1,0 +1,19 @@
+.form-container{
+    width:300px;
+    height: auto;
+    margin:auto;
+    padding:20px;
+    border:1px solid #ccc;
+    border-radius:5px;
+    box-shadow:2px 2px 12px #aaa;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: black;
+    background-color: aquamarine;
+}
+body{
+    font-family:Arial, sans-serif;
+    background-color:#f4f4f4;
+    padding:20px;
+}

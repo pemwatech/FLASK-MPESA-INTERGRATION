@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Mpesa Payment Form</title>
+        <meta charset="utf-8">
+        <meta name="viewport" http-equiv='refresh' content='10' content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+        
+    </head>
+    <body>
+
+       
+        <div class='form-container'>
+
+
+             {%for flash_message in get_flashed_messages()%}
+             {%if flash_message%}
+                <h2>{{flash_message}}</h2>
+                {%endif%}
+            {%endfor%}
+             {%if message%}
+             {{message}}
+             {%endif%}
+
+            
+            
+
+            <br></br>
+        
+        <form action="/" method="post">
+            <input type="tel" placeholder="enter number 2547...." name="number" required>
+            <br></br>
+            <input type="number" placeholder="enter amount" name="amount" required>
+            
+            
+            <br></br>
+            <br></br>
+            
+            
+            <input type="submit" value="pay">
+        </form>
+        </div>
+        
+        
+        
+        
+
+        
+        
+    </body>
+</html>
