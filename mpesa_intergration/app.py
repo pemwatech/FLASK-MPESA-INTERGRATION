@@ -10,7 +10,7 @@ import sqlite3
 load_dotenv()
 
 app=Flask(__name__)
-app.secret_key=os.getenv('secret_key')
+app.secret_key=os.getenv('SECRET_KEY')
 
 #RUN ONCE AFTER OPENING THE FLASK APPLICATION AND THEN COMMENT
 #database initialization
