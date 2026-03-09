@@ -1,7 +1,7 @@
 from flask import Flask, request, render_template, jsonify, flash
 import os, requests, base64
-import psycopg
-from psycopg.extras import RealDictCursor
+import psycopg2
+from psycopg2.extras import RealDictCursor
 from requests.auth import HTTPBasicAuth
 from datetime import datetime
 
@@ -11,7 +11,7 @@ app.secret_key = os.getenv('SECRET_KEY')
 # Database connection function
 def get_db():
     url = os.getenv('DATABASE_URL')
-    conn = psycopg.connect(url, cursor_factory=RealDictCursor)
+    conn = psycopg2.connect(url, cursor_factory=RealDictCursor)
     return conn
 
 # Initialize DB table
