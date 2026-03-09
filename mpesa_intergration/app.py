@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template, jsonify, flash
 import os, requests, base64
 import psycopg
+from psycopg.extras import RealDictCursor
 from requests.auth import HTTPBasicAuth
 from datetime import datetime
 
