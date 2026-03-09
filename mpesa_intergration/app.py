@@ -1,114 +1,111 @@
-from flask import Flask,request,render_template,request,jsonify,session,redirect,flash    
-from dotenv import load_dotenv 
-import os 
-import requests
-from requests.auth import HTTPBasicAuth 
-from datetime import datetime 
-import base64
-import sqlite3 
+from flask import Flask, request, render_template, jsonify, flash
+import os, requests, base64
+import psycopg2
+from psycopg2.extras import RealDictCursor
+from requests.auth import HTTPBasicAuth
+from datetime import datetime
 
-load_dotenv()
+app = Flask(__name__)
+app.secret_key = os.getenv('SECRET_KEY')
 
-app=Flask(__name__)
-app.secret_key=os.getenv('SECRET_KEY')
+# Database connection function
+def get_db():
+    url = os.getenv('DATABASE_URL')
+    conn = psycopg2.connect(url, cursor_factory=RealDictCursor)
+    return conn
 
-#RUN ONCE AFTER OPENING THE FLASK APPLICATION AND THEN COMMENT
-#database initialization
-db=sqlite3.connect('database.db')
-db.execute('CREATE TABLE IF NOT EXISTS payment(id INTEGER PRIMARY KEY AUTOINCREMENT,status TEXT)')
-db.commit()
-db.close()
+# Initialize DB table
+def init_db():
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute('''
+        CREATE TABLE IF NOT EXISTS payment (
+            id SERIAL PRIMARY KEY,
+            status TEXT
+        )
+    ''')
+    conn.commit()
+    cur.close()
+    conn.close()
 
+init_db()
 
-#GET ACCESS TOKEN TO BE ABLE TO TALK TO SAFARICOM TO OPEN YOUR SANDBOX
+# Get M-Pesa access token
 def get_access_token():
-    consumer_secret=os.getenv('CONSUMER_SECRET')
-    consumer_key=os.getenv('CONSUMER_KEY')
-    URL='https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
-    r=requests.get(URL,auth=HTTPBasicAuth(consumer_key,consumer_secret))
+    consumer_key = os.getenv('CONSUMER_KEY')
+    consumer_secret = os.getenv('CONSUMER_SECRET')
+    url = 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
+    r = requests.get(url, auth=HTTPBasicAuth(consumer_key, consumer_secret))
     return r.json().get('access_token')
 
-@app.route('/',methods=['POST','GET'])
+# Home route
+@app.route('/', methods=['GET', 'POST'])
 def home():
-    #CHECK WHETHER THE REQUEST METHOD IS 'POST' FOR SECURITY  
-    if request.method=='POST':
-        number=request.form.get('number')           
-        amount=int(request.form['amount'])
-        shortcode=os.getenv('BUSINESS_SHORTCODE')
-        passkey=os.getenv('PASSKEY')
-        callback_url=os.getenv('CALLBACK_URL')
-        access_token=get_access_token()
-        timestamp=datetime.now().strftime('%Y%m%d%H%M%S')
-        password=base64.b64encode((shortcode+passkey+timestamp).encode()).decode()
-        stkpush_url='https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
-        headers={'Authorization':f'Bearer {access_token}','Content-Type':'application/json'}
-        payload={
-            "BusinessShortCode":shortcode,
-            "Password":password,
-            "Timestamp":timestamp,
-            "TransactionType":"CustomerPayBillOnline",
-            "Amount":amount,
-            "PartyA":number,
-            "PartyB":shortcode,
-            "PhoneNumber":number,
-            "CallBackURL":callback_url,
-            "AccountReference":"TestPayment",
-            "TransactionDesc":"Flask M-pesa Test"
+    if request.method == 'POST':
+        number = request.form.get('number')
+        amount = int(request.form.get('amount'))
+        shortcode = os.getenv('BUSINESS_SHORTCODE')
+        passkey = os.getenv('PASSKEY')
+        callback_url = os.getenv('CALLBACK_URL')
+
+        access_token = get_access_token()
+        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+        password = base64.b64encode(f"{shortcode}{passkey}{timestamp}".encode()).decode()
+
+        stk_url = 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
+        headers = {
+            'Authorization': f'Bearer {access_token}',
+            'Content-Type': 'application/json'
+        }
+        payload = {
+            "BusinessShortCode": shortcode,
+            "Password": password,
+            "Timestamp": timestamp,
+            "TransactionType": "CustomerPayBillOnline",
+            "Amount": amount,
+            "PartyA": number,
+            "PartyB": shortcode,
+            "PhoneNumber": number,
+            "CallBackURL": callback_url,
+            "AccountReference": "TestPayment",
+            "TransactionDesc": "Flask M-Pesa Test"
         }
 
-        #send stk push
-        response=requests.post(stkpush_url,json=payload,headers=headers)
-        result=response.json()
+        response = requests.post(stk_url, json=payload, headers=headers)
+        result = response.json()
 
-        #CHECKING WHETHER THE STK PUSH WAS SENT OR NOT 
-
-        if result.get('ResponseCode')=='0':
-            flash('STK Push initiated successfully,check your phone')         
+        if result.get('ResponseCode') == '0':
+            flash('STK Push initiated successfully, check your phone.', 'success')
         else:
-            flash('stk push initiation failed')
+            flash(f"STK Push failed: {result.get('errorMessage', 'Unknown error')}", 'error')
 
-    #GETTING SAFARICOM CALLBACK/FEEDBACK INFORMATION WHICH WAS STORED IN DATABASE DURING...
-    #....CALLBACK ROUTE THEN DISPLAY INTO FORM.HTML PAGE
+    # Get last payment status
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute('SELECT * FROM payment ORDER BY id DESC LIMIT 1')
+    message = cur.fetchone()
+    cur.close()
+    conn.close()
 
-    db=sqlite3.connect('database.db')
-    db.row_factory=sqlite3.Row
-    message=db.execute('SELECT * FROM payment ORDER BY id DESC LIMIT 1').fetchone()
-    
+    status = message['status'] if message else None
+    return render_template('form.html', message=status)
 
-    return render_template('form.html',message=message['status'])
-
-@app.route('/callback',methods=['POST'])
+# Callback route
+@app.route('/callback', methods=['POST'])
 def mpesa_callback():
+    data = request.get_json()
+    stk = data.get('Body', {}).get('stkCallback', {})
+    result_code = stk.get('ResultCode')
+    result_desc = stk.get('ResultDesc')
 
-    #GETTING THE FEEDBACK OR CALLBACK FROM SAFARICOM 
-    data=request.get_json()
-    stk=data['Body']['stkCallback']
-    result_code=stk['ResultCode']
-    result_desc=stk['ResultDesc']
-
-    #CHECK WHETHER THE FEEDBACK WAS POSITIVE OR NOT AND STORING IT IN DATABASE TO ACCESS.... 
-    #.... IT LATER IN FORM.HTML 
-    if result_code==0:
-        status='payment successful'
-        db=sqlite3.connect('database.db')
-        db.execute('INSERT INTO payment (status) VALUES (?)',(status,))
-        db.commit()
-        db.close()
-
-        
-
+    conn = get_db()
+    cur = conn.cursor()
+    if result_code == 0:
+        cur.execute('INSERT INTO payment (status) VALUES (%s)', ('Payment successful',))
     else:
-        db=sqlite3.connect('database.db')
-        db.execute('INSERT INTO payment (status) VALUES (?)',(result_desc,))
-        db.commit()
-        db.close()
-            
-        
-    
-    return {'status':'received'},200
+        cur.execute('INSERT INTO payment (status) VALUES (%s)', (result_desc,))
+    conn.commit()
+    cur.close()
+    conn.close()
 
-
-    
-if __name__=='__main__':
-    app.run(debug=True)
-
+    return jsonify({'status': 'received'}), 200
