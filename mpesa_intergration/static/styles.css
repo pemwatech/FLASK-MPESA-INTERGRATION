@@ -30,6 +30,12 @@ body{
 @media(max-width:100%){
 
 .auth-card{
+body{
+    font-family:Arial, sans-serif;
+    background-color:#f4f4f4;
+    padding:20px;
+}
+
 padding:20px;
 
 .auth-card{
