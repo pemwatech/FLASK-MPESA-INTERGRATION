@@ -1,3 +1,26 @@
+body{
+    margin:0;
+    font-family:Arial, Helvetica, sans-serif;
+
+    background: linear-gradient(135deg,#5c6bc0,#3949ab);
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    height:100vh;
+}
+
+/* Center container */
+
+.auth-container{
+    width:100%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+/* Card */
 
 .auth-card{
 
@@ -13,19 +36,59 @@
     box-shadow:0 10px 25px rgba(0,0,0,0.2);
 }
 
-.auth-container{
-    max-width:100%;
-    display:flex;
-    justify-content:center;
-    align-items:center;
+/* Titles */
+
+h2{
+text-align:center;
+margin-bottom:5px;
 }
 
 
-body{
-    font-family:Arial, sans-serif;
-    background-color:#f4f4f4;
-    padding:20px;
+/* Inputs */
+
+input{
+
+width:100%;
+padding:12px;
+
+margin:8px 0;
+
+border:1px solid #ccc;
+
+border-radius:6px;
+
+font-size:16px;
+
+box-sizing:border-box;
 }
+
+/* Button */
+
+button{
+
+width:100%;
+
+padding:12px;
+
+margin-top:10px;
+
+background:#5c6bc0;
+
+color:white;
+
+border:none;
+
+border-radius:6px;
+
+font-size:16px;
+
+cursor:pointer;
+}
+
+button:hover{
+background:#3949ab;
+}
+
 
 @media(max-width:100%){
 
@@ -40,7 +103,7 @@ padding:20px;
 
 .auth-card{
 
-    background:white;
+    background:light blue;
 
     width:90%;
     max-width:400px;
