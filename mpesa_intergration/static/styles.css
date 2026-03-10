@@ -18,12 +18,6 @@ body{
     display:flex;
     justify-content:center;
     align-items:center;
-}
-
-/* Card */
-
-.auth-card{
-
     background:white;
 
     width:90%;
@@ -35,6 +29,8 @@ body{
 
     box-shadow:0 10px 25px rgba(0,0,0,0.2);
 }
+
+
 
 /* Titles */
 
@@ -91,29 +87,6 @@ background:#3949ab;
 
 
 @media(max-width:100%){
-
-.auth-card{
-body{
-    font-family:Arial, sans-serif;
-    background-color:#f4f4f4;
-    padding:20px;
-}
-
-padding:20px;
-
-.auth-card{
-
-    background:light blue;
-
-    width:90%;
-    max-width:400px;
-
-    padding:30px;
-
-    border-radius:12px;
-
-    box-shadow:0 10px 25px rgba(0,0,0,0.2);
-}
 
 .auth-container{
     max-width:100%;
