@@ -20,8 +20,15 @@
     align-items:center;
 }
 
+
 body{
     font-family:Arial, sans-serif;
     background-color:#f4f4f4;
     padding:20px;
+}
+
+@media(max-width:480px){
+
+.auth-card{
+padding:20px;
 }
