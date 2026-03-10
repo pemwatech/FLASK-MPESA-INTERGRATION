@@ -1,3 +1,24 @@
+
+.auth-card{
+
+    background:white;
+
+    width:90%;
+    max-width:400px;
+
+    padding:30px;
+
+    border-radius:12px;
+
+    box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
+
+.auth-container{
+    width:100%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
 .form-container{
     height:500px;
     width:100%:
