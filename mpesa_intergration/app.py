@@ -8,6 +8,11 @@ from datetime import datetime
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
 
+
+@app.route('/health')
+def health():
+    return 'ok'
+
 # Database connection function
 def get_db():
     url = os.getenv('DATABASE_URL')
