@@ -1,98 +1,102 @@
-body{
-    margin:0;
-    font-family:Arial, Helvetica, sans-serif;
-
-    background: linear-gradient(135deg,#5c6bc0,#3949ab);
-
-    display:flex;
-    justify-content:center;
-    align-items:center;
-
-    height:100vh;
+/* Reset default margins/padding */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Center container */
-
-.auth-container{
-    width:100%;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    background:white;
-
-    width:90%;
-    max-width:400px;
-
-    padding:30px;
-
-    border-radius:12px;
-
-    box-shadow:0 10px 25px rgba(0,0,0,0.2);
+body {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #5c6bc0, #3949ab);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
 }
 
-
-
-/* Titles */
-
-h2{
-text-align:center;
-margin-bottom:5px;
+/* Centered form container */
+.auth-container {
+    background-color: #fff;
+    padding: 30px 40px;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
 }
 
-
-/* Inputs */
-
-input{
-
-width:100%;
-padding:12px;
-
-margin:8px 0;
-
-border:1px solid #ccc;
-
-border-radius:6px;
-
-font-size:16px;
-
-box-sizing:border-box;
+/* Form heading (optional) */
+.auth-container h1 {
+    margin-bottom: 20px;
+    color: #3949ab;
 }
 
-/* Button */
-
-button{
-
-width:100%;
-
-padding:12px;
-
-margin-top:10px;
-
-background:#5c6bc0;
-
-color:white;
-
-border:none;
-
-border-radius:6px;
-
-font-size:16px;
-
-cursor:pointer;
+/* Inputs styling */
+.auth-container input[type="tel"],
+.auth-container input[type="number"] {
+    width: 100%;
+    padding: 12px 15px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border 0.3s;
 }
 
-button:hover{
-background:#3949ab;
+.auth-container input[type="tel"]:focus,
+.auth-container input[type="number"]:focus {
+    border-color: #3949ab;
+    outline: none;
 }
 
-
-@media(max-width:100%){
-
-.auth-container{
-    max-width:100%;
-    display:flex;
-    justify-content:center;
-    align-items:center;
+/* Pay button styling */
+.auth-container button {
+    width: 100%;
+    padding: 12px;
+    background-color: #3949ab;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
 }
 
+.auth-container button:hover {
+    background-color: #5c6bc0;
+    transform: translateY(-2px);
 }
+
+/* Status message */
+#payment-status {
+    margin-top: 20px;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 16px;
+    min-height: 24px;
+    transition: opacity 0.5s;
+}
+
+#payment-status.success {
+    color: #2e7d32;
+    background-color: #c8e6c9;
+}
+
+#payment-status.error {
+    color: #c62828;
+    background-color: #ffcdd2;
+}
+
+#payment-status.pending {
+    color: #1565c0;
+    background-color: #bbdefb;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .auth-container {
+        padding: 20px;
+        border-radius: 12px;
+    }
