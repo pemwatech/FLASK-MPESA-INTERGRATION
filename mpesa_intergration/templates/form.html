@@ -13,13 +13,14 @@
         <div class='auth-container'>
 
 
-
+ {%if get_flashed_messages()%}
              {%for flash_message in get_flashed_messages()%}
-             {%if flash_message%}
+            
              
                 <h2>{{flash_message}}</h2>
-                {%endif%}
+                
             {%endfor%}
+{%endif%}
              {%if message%}
              {{message}}
              {%endif%}
