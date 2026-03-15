@@ -37,6 +37,15 @@
 </div>
 
 <script>
+  // Auto-hide flash messages after 3 seconds
+  setTimeout(function() {
+      const flashes = document.getElementById('flash-messages');
+      if (flashes) {
+          flashes.style.opacity = '0';
+          setTimeout(() => flashes.remove(), 500); // remove after fade-out
+      }
+  }, 3000); // 3000ms = 3 seconds
+
     let currentStatus = '';
 
     async function fetchStatus() {
