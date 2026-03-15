@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Mpesa Payment Form</title>
+    <title>M-Pesa Payment Form</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
@@ -9,15 +9,16 @@
 <body>
 
 <div class='auth-container'>
+    <h1>Pay with M-Pesa</h1>
     <form id="pay-form">
         <input type="tel" placeholder="Enter number 2547..." name="number" required>
-        <br><br>
+        <br>
         <input type="number" placeholder="Enter amount" name="amount" required>
-        <br><br><br>
+        <br>
         <button type="submit">Pay</button>
     </form>
 
-    <div id="payment-status" style="margin-top:20px; color:blue;"></div>
+    <div id="payment-status"></div>
 </div>
 
 <script>
@@ -27,13 +28,14 @@ const statusDiv = document.getElementById('payment-status');
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    statusDiv.textContent = "Initiating payment...";
-
     const formData = new FormData(form);
     const payload = {
         number: formData.get('number'),
         amount: formData.get('amount')
     };
+
+    statusDiv.textContent = "Initiating payment...";
+    statusDiv.className = 'pending';
 
     try {
         const response = await fetch('/pay', {
@@ -44,26 +46,37 @@ form.addEventListener('submit', async (e) => {
 
         const data = await response.json();
 
-        if (data.success) {
-    statusDiv.textContent = "Payment initiated. Waiting for confirmation...";
-
-    const interval = setInterval(async () => {
-        const res = await fetch('/status');
-        const s = await res.json();
-        if (s.status && s.status !== "Pending") {
-            statusDiv.textContent = s.status;
-
-            if (s.status.toLowerCase().includes("successful")) {
-                clearInterval(interval);
-                setTimeout(() => window.location.href = "/success", 2000);
-            } else {
-                clearInterval(interval); // failed or cancelled
-            }
+        if (!data.success) {
+            statusDiv.textContent = `Payment failed: ${data.message}`;
+            statusDiv.className = 'error';
+            return;
         }
-    }, 3000); // poll every 3 seconds
-} catch (err) {
+
+        statusDiv.textContent = "Payment initiated, waiting for confirmation...";
+        statusDiv.className = 'pending';
+
+        const interval = setInterval(async () => {
+            const res = await fetch('/status');
+            const s = await res.json();
+
+            if (s.status && s.status !== 'Pending') {
+                statusDiv.textContent = s.status;
+
+                if (s.status.toLowerCase().includes('successful')) {
+                    statusDiv.className = 'success';
+                    clearInterval(interval);
+                    setTimeout(() => window.location.href = '/success', 2000);
+                } else {
+                    statusDiv.className = 'error';
+                    clearInterval(interval);
+                }
+            }
+        }, 3000);
+
+    } catch (err) {
         console.error(err);
         statusDiv.textContent = "Error initiating payment.";
+        statusDiv.className = 'error';
     }
 });
 </script>
