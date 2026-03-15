@@ -7,10 +7,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-
-<div class='auth-container'>
-
-    <div id="flash-messages">
+<div id="flash-messages">
         {% if get_flashed_messages() %}
             {% for flash_message in get_flashed_messages() %}
                 <h2>{{ flash_message }}</h2>
@@ -23,6 +20,10 @@
             {{ message }}
         {% endif %}
     </div>
+
+<div class='auth-container'>
+
+    
 
     <br>
 
