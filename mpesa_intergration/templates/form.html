@@ -7,75 +7,71 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-<div id="flash-messages">
-        {% if get_flashed_messages() %}
-            {% for flash_message in get_flashed_messages() %}
-                <h2>{{ flash_message }}</h2>
-            {% endfor %}
-        {% endif %}
-    </div>
-
-    <div id="payment-status">
-        {% if message %}
-            {{ message }}
-        {% endif %}
-    </div>
 
 <div class='auth-container'>
-
-    
-
-    <br>
-
-    <form action="/pay" method="post">
-        <input type="tel" placeholder="enter number 2547...." name="number" required>
+    <form id="pay-form">
+        <input type="tel" placeholder="Enter number 2547..." name="number" required>
         <br><br>
-        <input type="number" placeholder="enter amount" name="amount" required>
+        <input type="number" placeholder="Enter amount" name="amount" required>
         <br><br><br>
-        <input type="submit" value="pay">
+        <button type="submit">Pay</button>
     </form>
 
+    <div id="payment-status" style="margin-top:20px; color:blue;"></div>
 </div>
 
 <script>
-  // Auto-hide flash messages after 3 seconds
-  setTimeout(function() {
-      const flashes = document.getElementById('flash-messages');
-      if (flashes) {
-          flashes.style.opacity = '0';
-          setTimeout(() => flashes.remove(), 500); // remove after fade-out
-      }
-  }, 3000); // 3000ms = 3 seconds
+const form = document.getElementById('pay-form');
+const statusDiv = document.getElementById('payment-status');
 
-    let currentStatus = '';
+form.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-    async function fetchStatus() {
-        try {
-            const response = await fetch('/status');
-            if (!response.ok) return;
-            const data = await response.json();
+    statusDiv.textContent = "Initiating payment...";
 
-            // Only update if status changed
-            if (data.status && data.status !== currentStatus) {
-                currentStatus = data.status;
-                const statusDiv = document.getElementById('payment-status');
-                statusDiv.textContent = currentStatus;
+    const formData = new FormData(form);
+    const payload = {
+        number: formData.get('number'),
+        amount: formData.get('amount')
+    };
 
-                // Hide message after 5 seconds
-                setTimeout(() => {
-                    if (statusDiv.textContent === currentStatus) {
-                        statusDiv.textContent = '';
-                    }
-                }, 5000);
-            }
-        } catch (err) {
-            console.error('Error fetching status:', err);
+    try {
+        const response = await fetch('/pay', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (!data.success) {
+            statusDiv.textContent = `Payment initiation failed: ${data.message}`;
+            return;
         }
-    }
 
-    // Fetch every 5 seconds
-    setInterval(fetchStatus, 5000);
-    fetchStatus(); // initial fetch
+        statusDiv.textContent = "Payment initiated. Waiting for confirmation...";
+
+        // Poll /status every 3 seconds
+        const interval = setInterval(async () => {
+            const res = await fetch('/status');
+            const s = await res.json();
+            if (s.status) {
+                statusDiv.textContent = s.status;
+
+                if (s.status.toLowerCase().includes("successful")) {
+                    clearInterval(interval);
+                    setTimeout(() => window.location.href = "/success", 2000);
+                } else if (!s.status.toLowerCase().includes("pending")) {
+                    clearInterval(interval); // payment failed
+                }
+            }
+        }, 3000);
+
+    } catch (err) {
+        console.error(err);
+        statusDiv.textContent = "Error initiating payment.";
+    }
+});
 </script>
 
 </body>
