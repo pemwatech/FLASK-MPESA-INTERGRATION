@@ -81,8 +81,14 @@ def pay():
     result = response.json()
 
     if result.get('ResponseCode') == '0':
-        # STK Push successfully initiated
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute('INSERT INTO payment    (status) VALUES (%s)', ('Pending',))
+        conn.commit()
+        cur.close()
+        conn.close()
         return jsonify({'success': True})
+
     else:
         return jsonify({'success': False, 'message': result.get('errorMessage', 'Unknown error')})
 
