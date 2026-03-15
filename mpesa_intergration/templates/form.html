@@ -1,55 +1,72 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Mpesa Payment Form</title>
-        <meta charset="utf-8">
-        <meta name="viewport" http-equiv='refresh' content='10' content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-        
-    </head>
-    <body>
+<head>
+    <title>Mpesa Payment Form</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
 
-       
-        <div class='auth-container'>
+<div class='auth-container'>
 
+    <div id="flash-messages">
+        {% if get_flashed_messages() %}
+            {% for flash_message in get_flashed_messages() %}
+                <h2>{{ flash_message }}</h2>
+            {% endfor %}
+        {% endif %}
+    </div>
 
- {%if get_flashed_messages()%}
-             {%for flash_message in get_flashed_messages()%}
-            
-             
-                <h2>{{flash_message}}</h2>
-                
-            {%endfor%}
-{%endif%}
-             {%if message%}
-             {{message}}
-             {%endif%}
+    <div id="payment-status">
+        {% if message %}
+            {{ message }}
+        {% endif %}
+    </div>
 
-            
-            
+    <br>
 
-            <br></br>
-        
-        <form action="/pay" method="post">
-            <input type="tel" placeholder="enter number 2547...." name="number" required>
-            <br></br>
-            <input type="number" placeholder="enter amount" name="amount" required>
-            
-            
-            <br></br>
-            <br></br>
-            
-            
-            <input type="submit" value="pay">
-        </form>
-       
-        </div>
-        
-        
-        
-        
+    <form action="/pay" method="post">
+        <input type="tel" placeholder="enter number 2547...." name="number" required>
+        <br><br>
+        <input type="number" placeholder="enter amount" name="amount" required>
+        <br><br><br>
+        <input type="submit" value="pay">
+    </form>
 
-        
-        
-    </body>
+</div>
+
+<script>
+    let currentStatus = '';
+
+    async function fetchStatus() {
+        try {
+            const response = await fetch('/status');
+            if (!response.ok) return;
+            const data = await response.json();
+
+            // Only update if status changed
+            if (data.status && data.status !== currentStatus) {
+                currentStatus = data.status;
+                const statusDiv = document.getElementById('payment-status');
+                statusDiv.textContent = currentStatus;
+
+                // Hide message after 5 seconds
+                setTimeout(() => {
+                    if (statusDiv.textContent === currentStatus) {
+                        statusDiv.textContent = '';
+                    }
+                }, 5000);
+            }
+        } catch (err) {
+            console.error('Error fetching status:', err);
+        }
+    }
+
+    // Fetch every 5 seconds
+    setInterval(fetchStatus, 5000);
+    fetchStatus(); // initial fetch
+</script>
+
+</body>
 </html>
