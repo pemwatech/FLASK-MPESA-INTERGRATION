@@ -44,30 +44,24 @@ form.addEventListener('submit', async (e) => {
 
         const data = await response.json();
 
-        if (!data.success) {
-            statusDiv.textContent = `Payment initiation failed: ${data.message}`;
-            return;
-        }
+        if (data.success) {
+    statusDiv.textContent = "Payment initiated. Waiting for confirmation...";
 
-        statusDiv.textContent = "Payment initiated. Waiting for confirmation...";
+    const interval = setInterval(async () => {
+        const res = await fetch('/status');
+        const s = await res.json();
+        if (s.status && s.status !== "Pending") {
+            statusDiv.textContent = s.status;
 
-        // Poll /status every 3 seconds
-        const interval = setInterval(async () => {
-            const res = await fetch('/status');
-            const s = await res.json();
-            if (s.status) {
-                statusDiv.textContent = s.status;
-
-                if (s.status.toLowerCase().includes("successful")) {
-                    clearInterval(interval);
-                    setTimeout(() => window.location.href = "/success", 2000);
-                } else if (!s.status.toLowerCase().includes("pending")) {
-                    clearInterval(interval); // payment failed
-                }
+            if (s.status.toLowerCase().includes("successful")) {
+                clearInterval(interval);
+                setTimeout(() => window.location.href = "/success", 2000);
+            } else {
+                clearInterval(interval); // failed or cancelled
             }
-        }, 3000);
-
-    } catch (err) {
+        }
+    }, 3000); // poll every 3 seconds
+} catch (err) {
         console.error(err);
         statusDiv.textContent = "Error initiating payment.";
     }
