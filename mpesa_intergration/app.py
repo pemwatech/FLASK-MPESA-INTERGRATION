@@ -49,7 +49,7 @@ def get_access_token():
 
 # Home route
 @app.route('/pay', methods=['GET', 'POST'])
-def home():
+def pay():
     if request.method == 'POST':
         number = request.form.get('number')
         amount = int(request.form.get('amount'))
