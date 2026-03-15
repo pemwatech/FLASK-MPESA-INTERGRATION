@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, jsonify, redirect
+from flask import Flask, request, render_template, jsonify
 import os, requests, base64
 from requests.auth import HTTPBasicAuth
 from datetime import datetime
@@ -56,7 +56,6 @@ def pay():
     shortcode = os.getenv('BUSINESS_SHORTCODE')
     passkey = os.getenv('PASSKEY')
     callback_url = os.getenv('CALLBACK_URL')
-
     access_token = get_access_token()
     timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
     password = base64.b64encode(f"{shortcode}{passkey}{timestamp}".encode()).decode()
@@ -81,14 +80,14 @@ def pay():
     result = response.json()
 
     if result.get('ResponseCode') == '0':
+        # Insert Pending status into DB
         conn = get_db()
         cur = conn.cursor()
-        cur.execute('INSERT INTO payment    (status) VALUES (%s)', ('Pending',))
+        cur.execute('INSERT INTO payment (status) VALUES (%s)', ('Pending',))
         conn.commit()
         cur.close()
         conn.close()
         return jsonify({'success': True})
-
     else:
         return jsonify({'success': False, 'message': result.get('errorMessage', 'Unknown error')})
 
@@ -128,4 +127,4 @@ def mpesa_callback():
 
 @app.route('/success')
 def success():
-    return "<h1>Payment Successful!</h1>"
+    return "<h1 style='text-align:center; color:green; margin-top:50px;'>Payment Successful!</h1>"
