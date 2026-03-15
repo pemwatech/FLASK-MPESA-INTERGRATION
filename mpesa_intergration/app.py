@@ -13,6 +13,10 @@ app.secret_key = os.getenv('SECRET_KEY')
 def health():
     return 'ok'
 
+@app.route('/')
+def index():
+    return render_template('form.html')
+
 # Database connection function
 def get_db():
     url = os.getenv('DATABASE_URL')
@@ -44,7 +48,7 @@ def get_access_token():
     return r.json().get('access_token')
 
 # Home route
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/pay', methods=['GET', 'POST'])
 def home():
     if request.method == 'POST':
         number = request.form.get('number')
