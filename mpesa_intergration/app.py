@@ -87,17 +87,7 @@ def pay():
             flash('STK Push initiated successfully, check your phone.', 'success')
         else:
             flash(f"STK Push failed: {result.get('errorMessage', 'Unknown error')}", 'error')
-
-    # Get last payment status
-    conn = get_db()
-    cur = conn.cursor()
-    cur.execute('SELECT * FROM payment ORDER BY id DESC LIMIT 1')
-    message = cur.fetchone()
-    cur.close()
-    conn.close()
-
-    status = message['status'] if message else None
-    return render_template('form.html', message=status)
+    return render_template('form.html')
 
 @app.route('/status')
 def status():
