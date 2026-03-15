@@ -99,6 +99,19 @@ def pay():
     status = message['status'] if message else None
     return render_template('form.html', message=status)
 
+@app.route('/status')
+def status():
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute('SELECT * FROM payment ORDER BY id DESC LIMIT 1')
+    message = cur.fetchone()
+    cur.close()
+    conn.close()
+
+    status_text = message['status'] if message else None
+    return jsonify({'status': status_text})
+
+
 # Callback route
 @app.route('/callback', methods=['POST'])
 def mpesa_callback():
